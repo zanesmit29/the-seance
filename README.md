@@ -60,20 +60,20 @@ git clone https://github.com/zanesmit29/the-seance
 cd the-seance
 pip install -r requirements.txt
 
-# Run in mock mode — no API keys needed
-MOCK_MODE=true python app.py
+# Run in mock mode — no API keys needed (in PowerShell)
+$env:MOCK_MODE="true"; python app.py
 ```
 
 ```bash
 # Run with live models
 cp .env.example .env
 # Add your HF_TOKEN to .env
-MOCK_MODE=false python app.py
+$env:MOCK_MODE="false"; python app.py
 ```
 
 ```bash
-# Run tests
-pytest tests/
+# Run tests (in PowerShell)
+./.venv/Scripts/python.exe -m pytest tests -q
 ```
 
 ---

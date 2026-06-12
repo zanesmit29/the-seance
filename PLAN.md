@@ -51,10 +51,10 @@ AI weirdness is the product, not the feature. Every summoning is unique and unre
 ### Day 1 — Core pipeline working locally in mock mode
 
 **Morning (Issues #1, #2):**
-- [ ] Clone repo: `git clone https://github.com/zanesmit29/the-seance`
-- [ ] Install: `pip install -r requirements.txt`
-- [ ] Run in mock mode: `MOCK_MODE=true python app.py` — confirm UI opens
-- [ ] Run tests: `pytest tests/` — all 5 must pass
+- [x] Clone repo: `git clone https://github.com/zanesmit29/the-seance`
+- [x] Install: `pip install -r requirements.txt`
+- [x] Run in mock mode: `MOCK_MODE=true python app.py` — confirm UI opens
+- [x] Run tests: `pytest tests/` — all 5 must pass
 - [ ] Test system prompts on 5 concepts (see Issue #2)
 - [ ] Iterate prompts until Scientist and Mythologist voices are clearly distinct
 - [ ] Commit final prompts to `prompts/scientist.txt` and `prompts/mythologist.txt`
@@ -117,7 +117,7 @@ AI weirdness is the product, not the feature. Every summoning is unique and unre
 
 ## Definition of Done — MVP
 
-- [ ] `MOCK_MODE=true python app.py` runs without errors
+- [x] `MOCK_MODE=true python app.py` runs without errors
 - [ ] Scientist and Mythologist outputs are clearly distinct voices on any concept
 - [ ] FLUX prompt visibly references both text outputs
 - [ ] Image feels surreal and concept-specific (not generic)

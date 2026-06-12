@@ -129,7 +129,7 @@ footer, .share-button, .duplicate-button, .built-with { display: none !important
 with gr.Blocks(css=CUSTOM_CSS, title="The Séance") as demo:
 
     gr.HTML('<div id="seance-title">✦ The Séance ✦</div>')
-    gr.HTML('<div id="seance-subtitle">Name something that doesn't exist. Three entities will channel its form.</div>')
+    gr.HTML("<div id=\"seance-subtitle\">Name something that doesn't exist. Three entities will channel its form.</div>")
 
     with gr.Row():
         concept_input = gr.Textbox(
