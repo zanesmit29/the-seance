@@ -48,5 +48,6 @@ def test_run_returns_required_fields(pipeline):
     assert set(result.keys()) == {"scientist_text", "mythologist_text", "image_path"}
     assert result["scientist_text"] is not None
     assert result["mythologist_text"] is not None
+    assert result["image_path"] is not None
     assert len(result["scientist_text"]) > 10
     assert len(result["mythologist_text"]) > 10
