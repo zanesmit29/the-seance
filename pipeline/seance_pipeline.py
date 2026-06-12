@@ -15,6 +15,18 @@ class SeancePipeline:
         self.mythologist = MythologistAgent()
         self.dreamer = DreamerAgent()
 
+    def run(self, concept: str) -> dict:
+        """
+        Public interface for the pipeline.
+        Returns: {scientist_text, mythologist_text, image_path}
+        """
+        artifact = self.summon(concept)
+        return {
+            "scientist_text": artifact["scientist_text"],
+            "mythologist_text": artifact["mythologist_text"],
+            "image_path": artifact["image_path"],
+        }
+
     def summon(self, concept: str) -> dict:
         """
         Summon the form of a concept that doesn't exist.

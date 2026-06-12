@@ -41,3 +41,12 @@ def test_partial_failure_does_not_crash(pipeline):
     result = pipeline.summon("a memory that belongs to no one")
     assert result["concept"] == "a memory that belongs to no one"
     # No uncaught exception — partial output is acceptable
+
+def test_run_returns_required_fields(pipeline):
+    """run() must return {scientist_text, mythologist_text, image_path}."""
+    result = pipeline.run("the shape of a forgotten promise")
+    assert set(result.keys()) == {"scientist_text", "mythologist_text", "image_path"}
+    assert result["scientist_text"] is not None
+    assert result["mythologist_text"] is not None
+    assert len(result["scientist_text"]) > 10
+    assert len(result["mythologist_text"]) > 10
