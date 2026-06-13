@@ -4,11 +4,23 @@ Three AI entities channel the form of things that don't exist.
 """
 import os
 import gradio as gr
+from pathlib import Path
+from urllib.parse import quote
 from pipeline.seance_pipeline import SeancePipeline
 from config import load_env
 
 load_env()
 os.environ.setdefault("MOCK_MODE", "false")
+
+# Use the app's directory so audio works regardless of launch cwd.
+BASE_DIR = Path(__file__).resolve().parent
+AUDIO_DIR = BASE_DIR / "audio"
+AUDIO_FILE = AUDIO_DIR / "ambiance.MP3"
+if AUDIO_DIR.exists():
+    gr.set_static_paths(paths=[AUDIO_DIR])
+
+audio_file_web = str(AUDIO_FILE).replace("\\", "/")
+AUDIO_SRC = f"/gradio_api/file={quote(audio_file_web)}" if AUDIO_FILE.exists() else ""
 pipeline = SeancePipeline()
 
 # ---- Custom CSS: dark, eerie, uneasy ----
@@ -298,11 +310,125 @@ footer, .share-button, .duplicate-button, .built-with { display: none !important
     font-style: italic;
     letter-spacing: 0.04em;
 }
+/* Mute button style */
+#mute-btn {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    background: #0e0a18 !important;
+    border: 1px solid #3a2a5a !important;
+    color: #a070d0 !important;
+    padding: 10px 20px !important;
+    font-family: 'Georgia', serif !important;
+    font-size: 0.9em !important;
+    letter-spacing: 0.1em !important;
+    cursor: pointer !important;
+    z-index: 10000 !important;
+    animation: breathe 4s infinite !important;
+    border-radius: 2px !important;
+}
+#mute-btn:hover {
+    background: #180f2a !important;
+    border-color: #7050a0 !important;
+    color: #c090e0 !important;
+}
+"""
+BACKGROUND_AUDIO = f"""
+<audio id="seance-bg-audio" loop preload="auto">
+    <source src="{AUDIO_SRC}" type="audio/mpeg">
+</audio>
+
+<button id="enable-audio-btn" style="position: fixed; bottom: 70px; right: 20px; background: #0e0a18; border: 1px solid #3a2a5a; color: #a070d0; padding: 10px 20px; font-family: 'Georgia', serif; font-size: 0.9em; letter-spacing: 0.1em; cursor: pointer; z-index: 10000;">
+    🔊 Enable Sound
+</button>
+
+<button id="mute-btn" style="position: fixed; bottom: 20px; right: 20px; background: #0e0a18; border: 1px solid #3a2a5a; color: #a070d0; padding: 10px 20px; font-family: 'Georgia', serif; font-size: 0.9em; letter-spacing: 0.1em; cursor: pointer; z-index: 10000;">
+    🔇 Mute
+</button>
+"""
+
+HEAD_SNIPPET = """
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+<script>
+(() => {
+    const bindAudio = () => {
+        const audio = document.getElementById('seance-bg-audio');
+        const enableBtn = document.getElementById('enable-audio-btn');
+        const muteBtn = document.getElementById('mute-btn');
+        if (!audio || !enableBtn || !muteBtn) return false;
+
+        if (audio.dataset.bound === '1') return true;
+        audio.dataset.bound = '1';
+        audio.volume = 0.35;
+
+        let started = false;
+        let muted = false;
+
+        enableBtn.addEventListener('click', async () => {
+            try {
+                await audio.play();
+                started = true;
+                enableBtn.style.display = 'none';
+            } catch (e) {
+                console.error('Audio play failed:', e);
+            }
+        });
+
+        muteBtn.addEventListener('click', async () => {
+            if (!started) {
+                try {
+                    await audio.play();
+                    started = true;
+                    enableBtn.style.display = 'none';
+                } catch (e) {
+                    console.error('Audio play failed:', e);
+                    return;
+                }
+            }
+            muted = !muted;
+            audio.muted = muted;
+            muteBtn.textContent = muted ? '🔊 Unmute' : '🔇 Mute';
+        });
+
+        // Best effort autoplay: if browser allows, hide enable button; otherwise keep fallback.
+        (async () => {
+            try {
+                await audio.play();
+                started = true;
+                enableBtn.style.display = 'none';
+            } catch (e) {
+                // Expected on browsers that block autoplay with sound.
+                enableBtn.style.display = 'block';
+            }
+        })();
+
+        return true;
+    };
+
+    const startBinding = () => {
+        if (bindAudio()) return;
+        const observer = new MutationObserver(() => {
+            if (bindAudio()) observer.disconnect();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+        setTimeout(() => observer.disconnect(), 15000);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startBinding, { once: true });
+    } else {
+        startBinding();
+    }
+})();
+</script>
 """
 
 # ---- Build UI ----
-with gr.Blocks(css=CUSTOM_CSS, title="The Séance",
-               head='<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap" rel="stylesheet">') as demo:
+with gr.Blocks(title="The Séance") as demo:
+
+    # Add background audio
+    gr.HTML(BACKGROUND_AUDIO)
 
     gr.HTML('<div id="seance-title">✦ The Séance ✦</div>')
     gr.HTML("<div id=\"seance-subtitle\">Name something that doesn't exist. Three entities will channel its form.</div>")
@@ -378,4 +504,4 @@ with gr.Blocks(css=CUSTOM_CSS, title="The Séance",
     )
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(css=CUSTOM_CSS, head=HEAD_SNIPPET)
