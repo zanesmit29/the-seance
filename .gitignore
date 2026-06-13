@@ -67,3 +67,6 @@ results/
 *.jpg
 *.jpeg
 !assets/
+
+# Local-only notes
+.local/
