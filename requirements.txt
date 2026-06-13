@@ -1,11 +1,24 @@
-transformers>=4.48.0
-torch>=2.2.0
+# Validated Windows venv stack (Python 3.11, CUDA 12.8)
+# Note: gradio is pinned to 5.x — gradio>=6 requires huggingface_hub>=1.2.0
+# which conflicts with the pinned huggingface_hub==0.36.2.
+transformers==4.48.3
+torch==2.7.1
+torchvision==0.22.1
+huggingface_hub==0.36.2
+gradio==5.50.0
+attrs==25.4.0
+
+# Supporting packages used by the app and model loaders
 accelerate>=0.30.0
 bitsandbytes>=0.46.0
-gradio>=6.0.0
 spaces>=0.30.0
 Pillow>=10.0.0
 sentencepiece>=0.2.0
-huggingface_hub>=0.23.0
 python-dotenv>=1.0.0
 pytest>=8.0.0
+
+# Nemotron/Mamba backend for `agents/scientist.py`
+# Linux/WSL only — no Windows wheels available; nvcc required to build from source.
+# On Windows the Scientist falls back to Qwen/Qwen2.5-3B-Instruct automatically.
+# mamba-ssm==2.3.2.post1
+# causal-conv1d>=1.4.0

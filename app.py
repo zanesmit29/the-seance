@@ -438,7 +438,7 @@ HEAD_SNIPPET = """
 """
 
 # ---- Build UI ----
-with gr.Blocks(title="The Séance") as demo:
+with gr.Blocks(title="The Séance", css=CUSTOM_CSS, head=HEAD_SNIPPET) as demo:
 
     # Add background audio
     gr.HTML(BACKGROUND_AUDIO)
@@ -517,4 +517,4 @@ with gr.Blocks(title="The Séance") as demo:
     )
 
 if __name__ == "__main__":
-    demo.launch(css=CUSTOM_CSS, head=HEAD_SNIPPET)
+    demo.launch()

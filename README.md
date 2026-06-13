@@ -4,7 +4,7 @@ emoji: ✦
 colorFrom: indigo
 colorTo: black
 sdk: gradio
-sdk_version: 6.0.0
+sdk_version: 5.50.0
 app_file: app.py
 pinned: true
 ---
@@ -38,6 +38,28 @@ The outputs compose a single artifact card: two text panels and one AI-generated
 The FLUX image prompt is **chained from the text outputs** — not written independently. The image is a visual synthesis of both voices.
 
 The UI now renders all three entity loading states at once, then resolves all outputs together when generation completes.
+
+## Validated Requirements
+
+These are the package versions currently validated in the Windows `.venv` for this repo:
+
+```text
+transformers==4.48.3
+torch==2.7.1
+torchvision==0.22.1
+huggingface_hub==0.36.2
+gradio==5.50.0
+attrs==25.4.0
+accelerate>=0.30.0
+bitsandbytes>=0.46.0
+spaces>=0.30.0
+Pillow>=10.0.0
+sentencepiece>=0.2.0
+python-dotenv>=1.0.0
+pytest>=8.0.0
+```
+
+The Scientist model still has an optional Nemotron/Mamba backend. That backend requires `mamba-ssm` and `causal-conv1d`, which are currently Linux/WSL-only builds. On Windows, the app falls back to the alternate Scientist model automatically.
 
 ---
 
@@ -82,6 +104,12 @@ If your browser blocks autoplay, click **Enable Sound** in the bottom-right cont
 cp .env.example .env
 # Add your HF_TOKEN to .env
 $env:MOCK_MODE="false"; python app.py
+```
+
+If you want the full Nemotron Scientist backend instead of the fallback, use Linux or WSL and install the optional packages below:
+
+```bash
+pip install mamba-ssm causal-conv1d --no-build-isolation
 ```
 
 ```bash

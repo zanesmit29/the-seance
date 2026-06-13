@@ -59,6 +59,9 @@ AI weirdness is the product, not the feature. Every summoning is unique and unre
 - **Entity loading flow updated:** Scientist, Mythologist, and Dreamer loading animations now appear concurrently and resolve together at completion.
 - **Ambient sound added:** Background audio (`audio/ambiance.MP3`) with browser-safe autoplay attempt, Enable Sound fallback, and mute/unmute control.
 - **FLUX prompt constructor enhanced:** Static `STYLE_SUFFIX` replaced with a pool of 5 distinct style moods; new `extract_tone_words()` function detects emotional vocabulary from both agent outputs and injects mood hints into the prompt; style is selected deterministically via `hash(concept)` for reproducibility.
+- **Dependency resolution:** `gradio` pinned to `5.50.0` — `gradio>=6` requires `huggingface_hub>=1.2.0`, which conflicts with the pinned `huggingface_hub==0.36.2`. All versions confirmed incompatible on Windows (no binary wheels; source build requires nvcc).
+- **Gradio 5 CSS fix:** `css` and `head` arguments moved from `demo.launch()` to `gr.Blocks(...)` — Gradio 5 does not accept these on `launch()`.
+- **Scientist fallback confirmed:** Nemotron requires `mamba_ssm` and `causal_conv1d` which cannot be installed natively on Windows (no nvcc). Scientist automatically falls back to `Qwen/Qwen2.5-3B-Instruct` on Windows.
 
 ---
 
@@ -111,7 +114,7 @@ Notes:
   colorFrom: indigo
   colorTo: black
   sdk: gradio
-  sdk_version: 4.36.0
+  sdk_version: 5.50.0
   app_file: app.py
   pinned: true
   ---
@@ -122,7 +125,7 @@ Notes:
 
 **Afternoon:**
 - [ ] Test live inference on ZeroGPU — note cold start time
-- [ ] If VRAM issues: switch text models to HF Inference API (set `USE_INFERENCE_API=true`)
+- [ ] If VRAM issues: switch text models to HF Inference API via `InferenceClient` (same pattern as Dreamer)
 - [ ] Record demo video (60-90 seconds):
   - Scene 1: type "the sound a shadow makes" → watch three panels appear
   - Scene 2: download artifact card PNG
