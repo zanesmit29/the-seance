@@ -27,11 +27,11 @@ The outputs compose a single artifact card: two text panels and one AI-generated
 
 ## The Three Entities
 
-| Entity | Personality | Model | Params |
-|--------|------------|-------|--------|
-| **The Scientist** | Cold, precise, field-note voice | `nvidia/NVIDIA-Nemotron-3-Nano-4B-BF16` | 4B |
-| **The Mythologist** | Ancient, folkloric, feeling-forward | `openbmb/MiniCPM3-4B` | 4B |
-| **The Dreamer** | Generates the visual form of the concept | `black-forest-labs/FLUX.1-schnell` | ~12B |
+| Entity | Personality | Model | Inference | Visual Style |
+|--------|------------|-------|-----------|-------------|
+| **The Scientist** | Cold, precise, field-note voice | `nvidia/NVIDIA-Nemotron-3-Nano-4B-BF16` (→ Qwen2.5-3B fallback on Windows) | Local 4-bit GPU | Neon green monospace terminal |
+| **The Mythologist** | Ancient, folkloric, feeling-forward | `openbmb/MiniCPM3-4B` | Local 4-bit GPU | Purple serif italic, breathing glow |
+| **The Dreamer** | Generates the visual form of the concept | `black-forest-labs/FLUX.1-schnell` | HF Inference API | Desaturated, dimmed, animated fog overlay |
 
 **Total: ~20B params. All HuggingFace-native. All within hackathon constraints.**
 
@@ -89,7 +89,7 @@ $env:MOCK_MODE="false"; python app.py
 
 ## Badges Targeted
 
-- ✅ **Off-Brand** — Custom dark UI. No default Gradio chrome.
+- ✅ **Off-Brand** — Full-screen custom dark UI. Gothic blackletter title (UnifrakturMaguntia). Violent flicker on the scene. Neon green Scientist terminal. Cloudy desaturated Dreamer image. Zero default Gradio chrome.
 - ✅ **Field Notes** — Blog post about what was built and learned.
 - ⬜ **Sharing is Caring** — Open agent trace if time allows.
 
@@ -108,9 +108,9 @@ the-seance/
 ├── prompts/
 │   ├── scientist.txt       # System prompt: cold, clinical voice
 │   ├── mythologist.txt     # System prompt: ancient, folkloric voice
-│   └── flux_constructor.py # Chains text outputs → FLUX image prompt
+│   └── flux_constructor.py # Chains text outputs → FLUX prompt; tone extraction; 5 dynamic style moods
 ├── tests/
-│   └── test_pipeline.py    # 5 pytest unit tests
+│   └── test_pipeline.py    # 6 pytest unit tests
 ├── docs/
 │   └── architecture.md     # Pipeline diagram + ZeroGPU strategy
 ├── app.py                  # Gradio UI — custom dark atmosphere

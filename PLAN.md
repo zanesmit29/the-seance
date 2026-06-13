@@ -31,12 +31,13 @@ AI weirdness is the product, not the feature. Every summoning is unique and unre
 | `prompts/scientist.txt` | ✅ Scaffolded | System prompt v1 — live-tested, still needs refinement |
 | `prompts/mythologist.txt` | ✅ Scaffolded | System prompt v1 — live-tested, still needs refinement |
 | `prompts/flux_constructor.py` | ✅ Running | Chained prompt builder producing API-ready FLUX prompts |
-| `app.py` | ✅ Scaffolded | Custom dark Gradio UI, sequential reveal |
+| `app.py` | ✅ Live | Full-screen dark UI; violent flicker animations; gothic UnifrakturMaguntia title font; neon green Scientist; cloudy desaturated Dreamer image; sequential reveal |
+| `prompts/flux_constructor.py` | ✅ Enhanced | Dynamic STYLE_SUFFIXES (5 styles); tone extraction from agent text; concept-hashed style selection; richer prompt composition |
 | `tests/test_pipeline.py` | ✅ Passing | 6 pytest tests passing in mock mode |
 | `docs/architecture.md` | ✅ Scaffolded | Pipeline diagram + ZeroGPU notes |
 | `Dockerfile` | ✅ Scaffolded | |
 | `requirements.txt` | ✅ Updated in practice | Runtime now depends on `bitsandbytes`, `optimum`, model-specific extras, and HF API access |
-| `.env.example` | ✅ Scaffolded | May need refresh to match current API-first Dreamer behavior |
+| `.env.example` | ✅ Scaffolded | Matches current API-first Dreamer behaviour |
 | Prompt testing & refinement | ⚠️ In progress | Voices are distinct, but repetition/style tuning still needed |
 | FLUX prompt chaining validation | ⚠️ In progress | Prompts generate and images return, but visual quality still needs review |
 | Real model inference (live mode) | ✅ Working with caveats | Scientist uses fallback on this Windows setup; Mythologist local; Dreamer hosted |
@@ -54,6 +55,8 @@ AI weirdness is the product, not the feature. Every summoning is unique and unre
 - The Dreamer no longer downloads FLUX locally; it now uses Hugging Face hosted inference through `InferenceClient` and returns `output/artifact_image.png`.
 - The full pipeline was validated end-to-end: Scientist text, Mythologist text, FLUX prompt, and image path are all returned.
 - Local Hugging Face cache cleanup was needed after a large FLUX download attempt; local FLUX pipeline use is no longer the preferred path.
+- **UI overhaul:** Full-screen layout (100vw); pure-black background with violent multi-drop flicker animation on the scene and title; gothic `UnifrakturMaguntia` blackletter font loaded via Google Fonts for the title; neon green (`#00ff41`) terminal glow for the Scientist; purple breathing glow for the Mythologist (unchanged); desaturated + dimmed Dreamer image with animated fog-drift overlay; larger body text on all three entity panels; all Gradio default borders and focus rings suppressed via CSS variable overrides.
+- **FLUX prompt constructor enhanced:** Static `STYLE_SUFFIX` replaced with a pool of 5 distinct style moods; new `extract_tone_words()` function detects emotional vocabulary from both agent outputs and injects mood hints into the prompt; style is selected deterministically via `hash(concept)` for reproducibility.
 
 ---
 
@@ -171,7 +174,7 @@ Notes:
 
 ## Bonus Badges Checklist
 
-- [ ] **Off-Brand** — No default Gradio chrome. Custom dark CSS. Sequential reveal. Target confirmed.
+- [x] **Off-Brand** — Full-screen custom dark UI. Gothic title font. No Gradio chrome visible. Sequential reveal. Violent flicker. Neon Scientist. Cloudy Dreamer. ✅ Confident target met.
 - [ ] **Field Notes** — 400-600 word blog post. Draft on Day 2 evening.
 - [ ] **Sharing is Caring** — Open agent trace if time allows after submission.
 
