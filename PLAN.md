@@ -24,25 +24,36 @@ AI weirdness is the product, not the feature. Every summoning is unique and unre
 
 | File | Status | Notes |
 |------|--------|-------|
-| `agents/scientist.py` | ✅ Scaffolded | Nemotron-Nano-4B + mock mode |
-| `agents/mythologist.py` | ✅ Scaffolded | MiniCPM3-4B + mock mode |
-| `agents/dreamer.py` | ✅ Scaffolded | FLUX.1-schnell + placeholder mock |
-| `pipeline/seance_pipeline.py` | ✅ Scaffolded | Full chain + partial failure handling |
-| `prompts/scientist.txt` | ✅ Scaffolded | System prompt v1 — needs testing |
-| `prompts/mythologist.txt` | ✅ Scaffolded | System prompt v1 — needs testing |
-| `prompts/flux_constructor.py` | ✅ Scaffolded | Chained prompt builder |
+| `agents/scientist.py` | ✅ Live + fallback | 4-bit load; tries Nemotron first, falls back to Qwen2.5-3B-Instruct on Windows when Nemotron deps are unavailable |
+| `agents/mythologist.py` | ✅ Live | MiniCPM3-4B running in 4-bit locally on GPU |
+| `agents/dreamer.py` | ✅ Live via API | Uses Hugging Face `InferenceClient` for FLUX.1-schnell instead of local model download |
+| `pipeline/seance_pipeline.py` | ✅ Running | Full chain works end-to-end and returns an image path |
+| `prompts/scientist.txt` | ✅ Scaffolded | System prompt v1 — live-tested, still needs refinement |
+| `prompts/mythologist.txt` | ✅ Scaffolded | System prompt v1 — live-tested, still needs refinement |
+| `prompts/flux_constructor.py` | ✅ Running | Chained prompt builder producing API-ready FLUX prompts |
 | `app.py` | ✅ Scaffolded | Custom dark Gradio UI, sequential reveal |
-| `tests/test_pipeline.py` | ✅ Scaffolded | 5 pytest tests |
+| `tests/test_pipeline.py` | ✅ Passing | 6 pytest tests passing in mock mode |
 | `docs/architecture.md` | ✅ Scaffolded | Pipeline diagram + ZeroGPU notes |
 | `Dockerfile` | ✅ Scaffolded | |
-| `requirements.txt` | ✅ Scaffolded | |
-| `.env.example` | ✅ Scaffolded | |
-| Prompt testing & refinement | ❌ Not started | Issue #2 — critical path |
-| FLUX prompt chaining validation | ❌ Not started | Issue #3 |
-| Real model inference (live mode) | ❌ Not started | Issue #1 |
+| `requirements.txt` | ✅ Updated in practice | Runtime now depends on `bitsandbytes`, `optimum`, model-specific extras, and HF API access |
+| `.env.example` | ✅ Scaffolded | May need refresh to match current API-first Dreamer behavior |
+| Prompt testing & refinement | ⚠️ In progress | Voices are distinct, but repetition/style tuning still needed |
+| FLUX prompt chaining validation | ⚠️ In progress | Prompts generate and images return, but visual quality still needs review |
+| Real model inference (live mode) | ✅ Working with caveats | Scientist uses fallback on this Windows setup; Mythologist local; Dreamer hosted |
 | HF Spaces deployment | ❌ Not started | Issue #5 |
 | Demo video | ❌ Not started | Issue #5 |
 | Field Notes blog post | ❌ Not started | Issue #5 |
+
+---
+
+## Recent Progress
+
+- `.env` loading was fixed across the project so `HF_TOKEN` and `MOCK_MODE` now apply consistently.
+- The Scientist was moved to 4-bit loading and made resilient: it attempts Nemotron first, then falls back to `Qwen/Qwen2.5-3B-Instruct` when `mamba_ssm` / `causal_conv1d` are unavailable on Windows.
+- The Mythologist was switched off the unstable GPTQ path and now runs as `openbmb/MiniCPM3-4B` in 4-bit locally on GPU.
+- The Dreamer no longer downloads FLUX locally; it now uses Hugging Face hosted inference through `InferenceClient` and returns `output/artifact_image.png`.
+- The full pipeline was validated end-to-end: Scientist text, Mythologist text, FLUX prompt, and image path are all returned.
+- Local Hugging Face cache cleanup was needed after a large FLUX download attempt; local FLUX pipeline use is no longer the preferred path.
 
 ---
 
@@ -54,18 +65,23 @@ AI weirdness is the product, not the feature. Every summoning is unique and unre
 - [x] Clone repo: `git clone https://github.com/zanesmit29/the-seance`
 - [x] Install: `pip install -r requirements.txt`
 - [x] Run in mock mode: `MOCK_MODE=true python app.py` — confirm UI opens
-- [x] Run tests: `pytest tests/` — all 5 must pass
+- [x] Run tests: `pytest tests/` — all 6 current tests pass
 - [ ] Test system prompts on 5 concepts (see Issue #2)
 - [ ] Iterate prompts until Scientist and Mythologist voices are clearly distinct
 - [ ] Commit final prompts to `prompts/scientist.txt` and `prompts/mythologist.txt`
 
 **Afternoon (Issues #2, #3):**
 - [ ] Test FLUX prompt constructor on 5 concepts — print outputs, review quality
-- [ ] Confirm chained prompt references both text outputs visibly
-- [ ] Add your HF_TOKEN to `.env` (copy from `.env.example`)
-- [ ] Set `MOCK_MODE=false`, test live MiniCPM3-4B inference first (smallest model)
-- [ ] Test live Nemotron-Nano-4B inference
+- [x] Confirm chained prompt references both text outputs visibly
+- [x] Add your HF_TOKEN to `.env` (copy from `.env.example`)
+- [x] Set `MOCK_MODE=false`, test live MiniCPM3-4B inference first (smallest model)
+- [x] Test live Nemotron-Nano-4B inference
 - [ ] Note actual latency for each model
+
+Notes:
+- Nemotron did not stay fully usable on this Windows stack because its custom code requires `mamba_ssm` and `causal_conv1d`.
+- The current Scientist mitigation is automatic fallback to `Qwen/Qwen2.5-3B-Instruct`.
+- Dreamer was moved to Hugging Face hosted inference because local FLUX downloads and memory footprint were not practical on this laptop.
 
 **Evening (Issue #4 UI):**
 - [ ] Confirm custom CSS renders correctly — no Gradio chrome visible
@@ -118,12 +134,12 @@ AI weirdness is the product, not the feature. Every summoning is unique and unre
 ## Definition of Done — MVP
 
 - [x] `MOCK_MODE=true python app.py` runs without errors
-- [ ] Scientist and Mythologist outputs are clearly distinct voices on any concept
-- [ ] FLUX prompt visibly references both text outputs
-- [ ] Image feels surreal and concept-specific (not generic)
+- [ ] Scientist and Mythologist outputs are clearly distinct voices on any concept (partially validated; more prompt refinement needed)
+- [x] FLUX prompt visibly references both text outputs
+- [ ] Image feels surreal and concept-specific (not generic) (pipeline works; image quality still needs review)
 - [ ] Three panels reveal sequentially (not all at once)
 - [ ] Download button produces a composited PNG
-- [ ] `pytest tests/` — all 5 tests pass
+- [x] `pytest tests/` — all 6 tests pass
 - [ ] HF Space publicly accessible at https://huggingface.co/spaces/zanesmit29/the-seance
 - [ ] Demo video recorded (60-90s) and uploaded
 - [ ] Social media post drafted with artifact card image
@@ -145,11 +161,11 @@ AI weirdness is the product, not the feature. Every summoning is unique and unre
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|-----------|
-| FLUX.1-schnell latency >30s on ZeroGPU | Medium | High | Use 4 inference steps (schnell optimal); pre-test on Space |
+| FLUX.1-schnell latency or rate limits via hosted inference | Medium | High | Keep 4 inference steps; verify HF access/tier; consider fallback provider if needed |
 | MiniCPM3-4B voice indistinct from Scientist | Medium | High | Tight system prompts; test on 5 concepts before any code |
-| All 3 models exceed ZeroGPU VRAM simultaneously | Low | High | Lazy sequential loading already implemented in agents |
+| All 3 models exceed local VRAM simultaneously | Low | Medium | Dreamer now uses hosted inference; text agents still load sequentially |
 | ZeroGPU cold start adds 30s+ | High | Medium | Note in demo video; show mock mode as fallback |
-| Nemotron-Nano-4B not available via HF Inference API | Medium | Medium | Load locally with lazy unloading; or substitute Llama-3.2-1B-Instruct |
+| Nemotron-Nano-4B custom dependencies break on Windows | High | Medium | Keep Scientist fallback model in place or move Scientist to hosted inference |
 
 ---
 
