@@ -8,7 +8,7 @@ from pipeline.seance_pipeline import SeancePipeline
 from config import load_env
 
 load_env()
-os.environ.setdefault("MOCK_MODE", "true")
+os.environ.setdefault("MOCK_MODE", "false")
 pipeline = SeancePipeline()
 
 # ---- Custom CSS: dark, atmospheric, three distinct entity styles ----
