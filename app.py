@@ -5,7 +5,9 @@ Three AI entities channel the form of things that don't exist.
 import os
 import gradio as gr
 from pipeline.seance_pipeline import SeancePipeline
+from config import load_env
 
+load_env()
 os.environ.setdefault("MOCK_MODE", "true")
 pipeline = SeancePipeline()
 

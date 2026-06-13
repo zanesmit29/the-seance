@@ -3,11 +3,20 @@ The Séance Pipeline
 Orchestrates: Scientist → Mythologist → FLUX (chained prompt)
 Returns a complete artifact: scientist_text, mythologist_text, image_path
 """
-import os
+import sys
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
 from agents.scientist import ScientistAgent
 from agents.mythologist import MythologistAgent
 from agents.dreamer import DreamerAgent
+from config import load_env
 from prompts.flux_constructor import build_flux_prompt
+
+load_env()
 
 class SeancePipeline:
     def __init__(self):
@@ -78,7 +87,6 @@ class SeancePipeline:
         return artifact
 
 if __name__ == "__main__":
-    os.environ["MOCK_MODE"] = "true"
     pipeline = SeancePipeline()
     result = pipeline.summon("the sound a shadow makes")
     print("\nArtifact:")
