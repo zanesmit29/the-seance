@@ -11,124 +11,266 @@ load_env()
 os.environ.setdefault("MOCK_MODE", "false")
 pipeline = SeancePipeline()
 
-# ---- Custom CSS: dark, atmospheric, three distinct entity styles ----
-CUSTOM_CSS = """
-* { box-sizing: border-box; }
+# ---- Custom CSS: dark, eerie, uneasy ----
+CUSTOM_CSS = """@keyframes flicker {
+    0%, 8%, 12%, 16%, 20%, 50%, 54%, 58%, 80%, 84%, 100% { opacity: 1; }
+    10%, 14% { opacity: 0.15; }
+    18% { opacity: 0.6; }
+    52%, 56% { opacity: 0.1; }
+    82% { opacity: 0.5; }
+}
+@keyframes scene-flicker {
+    0%, 88%, 92%, 96%, 100% { opacity: 1; }
+    89%, 93% { opacity: 0.25; }
+    90%, 94% { opacity: 0.85; }
+    97% { opacity: 0.4; }
+    98% { opacity: 0.9; }
+}
+@keyframes breathe {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.88; }
+}
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 10px rgba(100, 50, 180, 0.3), inset 0 0 20px rgba(100, 50, 180, 0.1); }
+    50% { box-shadow: 0 0 25px rgba(100, 50, 180, 0.5), inset 0 0 30px rgba(100, 50, 180, 0.2); }
+}
+@keyframes fog-drift {
+    0% { opacity: 0.55; transform: translateX(0) scaleX(1); }
+    50% { opacity: 0.75; transform: translateX(8px) scaleX(1.02); }
+    100% { opacity: 0.55; transform: translateX(0) scaleX(1); }
+}
+
+* { box-sizing: border-box; outline: none !important; }
+*:focus, *:focus-visible, *:focus-within { outline: none !important; box-shadow: none !important; }
+.block, .block:focus, .block:focus-within { outline: none !important; box-shadow: none !important; border-color: transparent !important; }
+
+/* Kill Gradio component container borders everywhere */
+.gradio-container .block,
+.gradio-container [class*="block"],
+.gradio-container label,
+.gradio-container .wrap,
+.gradio-container .container,
+.gradio-container > div > div,
+.gradio-container form,
+.svelte-1f354aw,
+.svelte-1gfkn6j {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    background: transparent !important;
+}
+
+/* Override Gradio 6 CSS variables for the input component */
+:root, .gradio-container {
+    --block-border-color: transparent !important;
+    --block-border-width: 0px !important;
+    --input-border-color: #2e2248 !important;
+    --input-border-color-focus: #4a3a70 !important;
+    --border-color-primary: transparent !important;
+    --block-background-fill: transparent !important;
+    --input-background-fill: #0c0a12 !important;
+    --block-shadow: none !important;
+    --input-shadow: none !important;
+    --input-shadow-focus: none !important;
+}
+
+html {
+    background: #050507 !important;
+    animation: scene-flicker 7s infinite;
+}
 
 body, .gradio-container {
-    background-color: #0d0d0f !important;
-    color: #c8c8d0 !important;
+    background: #050507 !important;
+    color: #b0a8c0 !important;
     font-family: 'Georgia', serif;
 }
 
-.gradio-container { max-width: 860px !important; margin: 0 auto !important; }
+.gradio-container { max-width: 100vw !important; width: 100% !important; min-height: 100vh !important; margin: 0 !important; padding: 0 40px !important; }
 
 /* Hide all default Gradio chrome */
 footer, .share-button, .duplicate-button, .built-with { display: none !important; }
 .svelte-1ipelgc { display: none !important; }
 
-/* Title */
+/* Title — eerie gothic, violent flicker */
 #seance-title {
     text-align: center;
     padding: 40px 0 10px;
-    font-size: 2.2em;
-    letter-spacing: 0.12em;
-    color: #e8e0d0;
-    font-family: 'Georgia', serif;
+    font-size: 3em;
+    letter-spacing: 0.08em;
+    color: #d0c8e0;
+    font-family: 'UnifrakturMaguntia', 'Palatino Linotype', serif;
+    animation: flicker 2.8s infinite;
+    text-shadow: 0 0 30px rgba(100, 50, 180, 0.6), 0 0 60px rgba(100, 50, 180, 0.3), 0 0 2px #fff;
 }
 #seance-subtitle {
     text-align: center;
-    color: #666070;
+    color: #6a5880;
     font-size: 0.95em;
     letter-spacing: 0.06em;
     margin-bottom: 36px;
     font-style: italic;
+    animation: breathe 6s infinite;
+    text-shadow: 0 0 15px rgba(80, 30, 120, 0.3);
 }
 
-/* Input area */
+/* Input area — kill ALL Gradio default borders and glows */
+#concept-input, #concept-input *, #concept-input *:focus, #concept-input *:active, #concept-input *:hover {
+    outline: none !important;
+}
+#concept-input > *, #concept-input label, #concept-input .block, #concept-input .wrap, #concept-input > div {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
 #concept-input textarea {
-    background: #141418 !important;
-    border: 1px solid #2a2a35 !important;
-    color: #e0ddd8 !important;
+    background: #0c0a12 !important;
+    border: 1px solid #2e2248 !important;
+    color: #c0b8d0 !important;
     font-family: 'Georgia', serif !important;
     font-size: 1.1em !important;
     text-align: center;
-    border-radius: 4px;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    caret-color: #8060a0;
+    padding: 12px !important;
 }
+#concept-input textarea:focus {
+    border-color: #4a3a70 !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
 #summon-btn {
-    background: #1a1a22 !important;
-    border: 1px solid #3a3a50 !important;
-    color: #a090c0 !important;
+    background: #0e0a18 !important;
+    border: 1px solid #3a2a5a !important;
+    color: #a070d0 !important;
     letter-spacing: 0.15em !important;
     font-family: 'Georgia', serif !important;
     font-size: 0.9em !important;
+    animation: breathe 4s infinite;
 }
-#summon-btn:hover { background: #22222e !important; border-color: #6050a0 !important; }
+#summon-btn:hover {
+    background: #180f2a !important;
+    border-color: #7050a0 !important;
+    color: #c090e0 !important;
+}
 
-/* Scientist panel — monospace, terminal green tint */
+/* Scientist panel — rigid, cold, neon green terminal */
 #scientist-panel {
-    background: #0c110e !important;
-    border: 1px solid #1a2e1e !important;
-    border-radius: 4px;
+    background: #030a04 !important;
+    border-top: 1px solid #1a3a1a !important;
+    border-right: 1px solid #1a3a1a !important;
+    border-bottom: 1px solid #1a3a1a !important;
+    border-left: 3px solid #00ff41 !important;
+    border-radius: 0;
     padding: 20px;
     font-family: 'Courier New', monospace !important;
-    color: #7abf8a !important;
-    font-size: 0.88em;
+    color: #00ff41 !important;
+    font-size: 1.1em;
     line-height: 1.7;
     min-height: 100px;
+    letter-spacing: 0.04em;
+    box-shadow: 0 0 12px rgba(0, 255, 65, 0.15), inset 0 0 8px rgba(0, 255, 65, 0.05);
+    text-shadow: 0 0 6px rgba(0, 255, 65, 0.6);
 }
 #scientist-label {
-    color: #3a6640;
+    color: #00cc33;
     font-family: 'Courier New', monospace;
     font-size: 0.75em;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.28em;
     margin-bottom: 8px;
     text-transform: uppercase;
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
 }
 
-/* Mythologist panel — serif, amber/parchment tint */
+/* Mythologist panel — amber, breathing, eerie */
 #mythologist-panel {
-    background: #120f08 !important;
-    border: 1px solid #2e2010 !important;
-    border-radius: 4px;
+    background: linear-gradient(135deg, #0f0815 0%, #1a0f25 100%) !important;
+    border: 2px solid #4a3a7a !important;
+    border-radius: 2px;
     padding: 20px;
     font-family: 'Georgia', serif !important;
-    color: #c8a96a !important;
-    font-size: 0.95em;
-    line-height: 1.8;
+    color: #d8a0ff !important;
+    font-size: 1.15em;
+    line-height: 1.9;
     font-style: italic;
     min-height: 100px;
+    animation: breathe 5s ease-in-out infinite;
+    box-shadow: 0 0 20px rgba(180, 100, 255, 0.2), inset 0 0 15px rgba(180, 100, 255, 0.1);
+    text-shadow: 0 0 10px rgba(180, 100, 255, 0.3);
 }
 #mythologist-label {
-    color: #6a5020;
+    color: #7a5a9a;
     font-family: 'Georgia', serif;
     font-size: 0.75em;
     letter-spacing: 0.2em;
     margin-bottom: 8px;
     text-transform: uppercase;
     font-style: normal;
+    animation: flicker 4s infinite;
+    text-shadow: 0 0 8px rgba(180, 100, 255, 0.4);
 }
 
-/* Image panel */
+/* Dreamer — cloudy, desaturated, fog overlay */
+#dreamer-image {
+    position: relative;
+    overflow: hidden;
+    background: #08060e !important;
+}
+#dreamer-image .wrap, #dreamer-image .block, #dreamer-image > div {
+    background: #08060e !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+#dreamer-image button, #dreamer-image .icon-button {
+    background: transparent !important;
+    border: none !important;
+    opacity: 0.4;
+}
 #dreamer-image img {
-    border-radius: 4px;
-    border: 1px solid #1e1a28;
+    border-radius: 0;
+    border: 2px solid #201828;
     width: 100%;
+    display: block;
+    filter: saturate(0.35) brightness(0.72) contrast(0.88);
+}
+#dreamer-image::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+        radial-gradient(ellipse at 15% 25%, rgba(200, 210, 240, 0.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 65%, rgba(180, 190, 230, 0.09) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 10%, rgba(220, 220, 255, 0.08) 0%, transparent 40%),
+        linear-gradient(180deg, rgba(150,150,180,0.06) 0%, transparent 30%, transparent 70%, rgba(100,100,140,0.1) 100%);
+    pointer-events: none;
+    animation: fog-drift 12s ease-in-out infinite;
 }
 #dreamer-label {
-    color: #4a3a6a;
+    color: #5a4a7a;
     font-size: 0.75em;
     letter-spacing: 0.2em;
     margin-bottom: 8px;
     text-transform: uppercase;
+    animation: breathe 5s infinite;
 }
 
 /* Status message */
-#status-msg { color: #504858; font-size: 0.8em; text-align: center; font-style: italic; }
+#status-msg {
+    color: #6a5880;
+    font-size: 0.8em;
+    text-align: center;
+    font-style: italic;
+    animation: flicker 3s infinite;
+    letter-spacing: 0.05em;
+}
 """
 
 # ---- Build UI ----
-with gr.Blocks(css=CUSTOM_CSS, title="The Séance") as demo:
+with gr.Blocks(css=CUSTOM_CSS, title="The Séance",
+               head='<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap" rel="stylesheet">') as demo:
 
     gr.HTML('<div id="seance-title">✦ The Séance ✦</div>')
     gr.HTML("<div id=\"seance-subtitle\">Name something that doesn't exist. Three entities will channel its form.</div>")
