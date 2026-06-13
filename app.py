@@ -9,6 +9,11 @@ from urllib.parse import quote
 from pipeline.seance_pipeline import SeancePipeline
 from config import load_env
 
+try:
+    import spaces  # type: ignore[import-not-found]
+except ImportError:
+    spaces = None
+
 load_env()
 os.environ.setdefault("MOCK_MODE", "false")
 
@@ -22,6 +27,14 @@ if AUDIO_DIR.exists():
 audio_file_web = str(AUDIO_FILE).replace("\\", "/")
 AUDIO_SRC = f"/gradio_api/file={quote(audio_file_web)}" if AUDIO_FILE.exists() else ""
 pipeline = SeancePipeline()
+
+if spaces is not None:
+    @spaces.GPU(duration=90)
+    def _summon_on_gpu(concept: str):
+        return pipeline.summon(concept)
+else:
+    def _summon_on_gpu(concept: str):
+        return pipeline.summon(concept)
 
 # ---- Custom CSS: dark, eerie, uneasy ----
 CUSTOM_CSS = """@keyframes flicker {
@@ -481,7 +494,7 @@ with gr.Blocks(title="The Séance") as demo:
             gr.update(visible=False),
         )
 
-        artifact = pipeline.summon(concept)
+        artifact = _summon_on_gpu(concept)
 
         yield (
             '<div id="status-msg">The summoning is complete.</div>',
