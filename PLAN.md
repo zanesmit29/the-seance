@@ -16,7 +16,7 @@ AI weirdness is the product, not the feature. Every summoning is unique and unre
 - Delight: The three-voice format is inherently surprising and replayable
 - AI is load-bearing: Remove any model and the experience collapses entirely
 - Originality: No utility. No dashboard. The séance IS the product.
-- Gradio polish: Custom dark UI, sequential reveal, download — targets Off-Brand badge
+- Gradio polish: Custom dark UI, concurrent entity loading flow, download — targets Off-Brand badge
 
 ---
 
@@ -30,13 +30,13 @@ AI weirdness is the product, not the feature. Every summoning is unique and unre
 | `pipeline/seance_pipeline.py` | ✅ Running | Full chain works end-to-end and returns an image path |
 | `prompts/scientist.txt` | ✅ Scaffolded | System prompt v1 — live-tested, still needs refinement |
 | `prompts/mythologist.txt` | ✅ Scaffolded | System prompt v1 — live-tested, still needs refinement |
-| `prompts/flux_constructor.py` | ✅ Running | Chained prompt builder producing API-ready FLUX prompts |
-| `app.py` | ✅ Live | Full-screen dark UI; violent flicker animations; gothic UnifrakturMaguntia title font; neon green Scientist; cloudy desaturated Dreamer image; sequential reveal |
-| `prompts/flux_constructor.py` | ✅ Enhanced | Dynamic STYLE_SUFFIXES (5 styles); tone extraction from agent text; concept-hashed style selection; richer prompt composition |
+| `prompts/flux_constructor.py` | ✅ Enhanced | Chained prompt builder with dynamic STYLE_SUFFIXES (5 styles), tone extraction, and concept-hashed style selection |
+| `app.py` | ✅ Live | Full-screen dark UI; violent flicker animations; gothic UnifrakturMaguntia title font; neon green Scientist; concurrent loading animations for all entities; ambient audio controls with autoplay fallback |
+| `audio/ambiance.MP3` | ✅ Added | Background ambient loop served as static asset via Gradio |
 | `tests/test_pipeline.py` | ✅ Passing | 6 pytest tests passing in mock mode |
 | `docs/architecture.md` | ✅ Scaffolded | Pipeline diagram + ZeroGPU notes |
 | `Dockerfile` | ✅ Scaffolded | |
-| `requirements.txt` | ✅ Updated in practice | Runtime now depends on `bitsandbytes`, `optimum`, model-specific extras, and HF API access |
+| `requirements.txt` | ✅ Synced | Runtime depends on `transformers`, `torch`, `accelerate`, `bitsandbytes`, `gradio`, `huggingface_hub`, `Pillow`, `sentencepiece`, `python-dotenv`, `pytest` |
 | `.env.example` | ✅ Scaffolded | Matches current API-first Dreamer behaviour |
 | Prompt testing & refinement | ⚠️ In progress | Voices are distinct, but repetition/style tuning still needed |
 | FLUX prompt chaining validation | ⚠️ In progress | Prompts generate and images return, but visual quality still needs review |
@@ -55,7 +55,9 @@ AI weirdness is the product, not the feature. Every summoning is unique and unre
 - The Dreamer no longer downloads FLUX locally; it now uses Hugging Face hosted inference through `InferenceClient` and returns `output/artifact_image.png`.
 - The full pipeline was validated end-to-end: Scientist text, Mythologist text, FLUX prompt, and image path are all returned.
 - Local Hugging Face cache cleanup was needed after a large FLUX download attempt; local FLUX pipeline use is no longer the preferred path.
-- **UI overhaul:** Full-screen layout (100vw); pure-black background with violent multi-drop flicker animation on the scene and title; gothic `UnifrakturMaguntia` blackletter font loaded via Google Fonts for the title; neon green (`#00ff41`) terminal glow for the Scientist; purple breathing glow for the Mythologist (unchanged); desaturated + dimmed Dreamer image with animated fog-drift overlay; larger body text on all three entity panels; all Gradio default borders and focus rings suppressed via CSS variable overrides.
+- **UI overhaul:** Full-screen layout (100vw); pure-black background with violent multi-drop flicker animation on the scene and title; gothic `UnifrakturMaguntia` blackletter font loaded via Google Fonts for the title; neon green (`#00ff41`) terminal glow for the Scientist; purple breathing glow for the Mythologist (unchanged); clean Dreamer image frame (no tint overlay); larger body text on all three entity panels; all Gradio default borders and focus rings suppressed via CSS variable overrides.
+- **Entity loading flow updated:** Scientist, Mythologist, and Dreamer loading animations now appear concurrently and resolve together at completion.
+- **Ambient sound added:** Background audio (`audio/ambiance.MP3`) with browser-safe autoplay attempt, Enable Sound fallback, and mute/unmute control.
 - **FLUX prompt constructor enhanced:** Static `STYLE_SUFFIX` replaced with a pool of 5 distinct style moods; new `extract_tone_words()` function detects emotional vocabulary from both agent outputs and injects mood hints into the prompt; style is selected deterministically via `hash(concept)` for reproducibility.
 
 ---
@@ -88,7 +90,7 @@ Notes:
 
 **Evening (Issue #4 UI):**
 - [ ] Confirm custom CSS renders correctly — no Gradio chrome visible
-- [ ] Test sequential panel reveal: Scientist → Mythologist → image
+- [x] Confirm all three entity loading states render concurrently before final reveal
 - [ ] Test download button — confirm artifact card PNG saves correctly
 - [ ] Screenshot the UI — this is your social post image
 
@@ -140,7 +142,7 @@ Notes:
 - [ ] Scientist and Mythologist outputs are clearly distinct voices on any concept (partially validated; more prompt refinement needed)
 - [x] FLUX prompt visibly references both text outputs
 - [ ] Image feels surreal and concept-specific (not generic) (pipeline works; image quality still needs review)
-- [ ] Three panels reveal sequentially (not all at once)
+- [x] Entity loading states appear together and resolve into final outputs
 - [ ] Download button produces a composited PNG
 - [x] `pytest tests/` — all 6 tests pass
 - [ ] HF Space publicly accessible at https://huggingface.co/spaces/zanesmit29/the-seance
@@ -174,7 +176,7 @@ Notes:
 
 ## Bonus Badges Checklist
 
-- [x] **Off-Brand** — Full-screen custom dark UI. Gothic title font. No Gradio chrome visible. Sequential reveal. Violent flicker. Neon Scientist. Cloudy Dreamer. ✅ Confident target met.
+- [x] **Off-Brand** — Full-screen custom dark UI. Gothic title font. No Gradio chrome visible. Concurrent entity loading flow. Violent flicker. Neon Scientist. Ambient audio controls. ✅ Confident target met.
 - [ ] **Field Notes** — 400-600 word blog post. Draft on Day 2 evening.
 - [ ] **Sharing is Caring** — Open agent trace if time allows after submission.
 

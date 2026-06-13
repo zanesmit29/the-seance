@@ -4,7 +4,7 @@ emoji: ✦
 colorFrom: indigo
 colorTo: black
 sdk: gradio
-sdk_version: 4.36.0
+sdk_version: 6.0.0
 app_file: app.py
 pinned: true
 ---
@@ -31,11 +31,22 @@ The outputs compose a single artifact card: two text panels and one AI-generated
 |--------|------------|-------|-----------|-------------|
 | **The Scientist** | Cold, precise, field-note voice | `nvidia/NVIDIA-Nemotron-3-Nano-4B-BF16` (→ Qwen2.5-3B fallback on Windows) | Local 4-bit GPU | Neon green monospace terminal |
 | **The Mythologist** | Ancient, folkloric, feeling-forward | `openbmb/MiniCPM3-4B` | Local 4-bit GPU | Purple serif italic, breathing glow |
-| **The Dreamer** | Generates the visual form of the concept | `black-forest-labs/FLUX.1-schnell` | HF Inference API | Desaturated, dimmed, animated fog overlay |
+| **The Dreamer** | Generates the visual form of the concept | `black-forest-labs/FLUX.1-schnell` | HF Inference API | Clean image frame with concurrent loading panel |
 
 **Total: ~20B params. All HuggingFace-native. All within hackathon constraints.**
 
 The FLUX image prompt is **chained from the text outputs** — not written independently. The image is a visual synthesis of both voices.
+
+The UI now renders all three entity loading states at once, then resolves all outputs together when generation completes.
+
+---
+
+## Ambient Audio
+
+- Background ambiance is served from `audio/ambiance.MP3`.
+- The app attempts autoplay once on load.
+- If autoplay is blocked by browser policy, users can click **Enable Sound**.
+- **Mute/Unmute** is always available once audio starts.
 
 ---
 
@@ -64,6 +75,8 @@ pip install -r requirements.txt
 $env:MOCK_MODE="true"; python app.py
 ```
 
+If your browser blocks autoplay, click **Enable Sound** in the bottom-right controls.
+
 ```bash
 # Run with live models
 cp .env.example .env
@@ -89,7 +102,7 @@ $env:MOCK_MODE="false"; python app.py
 
 ## Badges Targeted
 
-- ✅ **Off-Brand** — Full-screen custom dark UI. Gothic blackletter title (UnifrakturMaguntia). Violent flicker on the scene. Neon green Scientist terminal. Cloudy desaturated Dreamer image. Zero default Gradio chrome.
+- ✅ **Off-Brand** — Full-screen custom dark UI. Gothic blackletter title (UnifrakturMaguntia). Violent flicker on the scene. Neon green Scientist terminal. Concurrent entity loading states. Ambient audio controls. Zero default Gradio chrome.
 - ✅ **Field Notes** — Blog post about what was built and learned.
 - ⬜ **Sharing is Caring** — Open agent trace if time allows.
 
@@ -103,6 +116,8 @@ the-seance/
 │   ├── scientist.py        # Nemotron-Nano-4B — The Scientist
 │   ├── mythologist.py      # MiniCPM3-4B — The Mythologist
 │   └── dreamer.py          # FLUX.1-schnell — The Dreamer
+├── audio/
+│   └── ambiance.MP3        # Background ambient loop for the UI
 ├── pipeline/
 │   └── seance_pipeline.py  # Main orchestration: chain all 3 models
 ├── prompts/
