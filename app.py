@@ -39,6 +39,14 @@ CUSTOM_CSS = """@keyframes flicker {
     50% { opacity: 0.75; transform: translateX(8px) scaleX(1.02); }
     100% { opacity: 0.55; transform: translateX(0) scaleX(1); }
 }
+@keyframes loading-pulse {
+    0%, 100% { opacity: 0.45; }
+    50% { opacity: 1; }
+}
+@keyframes loading-dots {
+    0% { width: 0; }
+    100% { width: 3ch; }
+}
 
 * { box-sizing: border-box; outline: none !important; }
 *:focus, *:focus-visible, *:focus-within { outline: none !important; box-shadow: none !important; }
@@ -217,10 +225,10 @@ footer, .share-button, .duplicate-button, .built-with { display: none !important
 #dreamer-image {
     position: relative;
     overflow: hidden;
-    background: #08060e !important;
+    background: transparent !important;
 }
 #dreamer-image .wrap, #dreamer-image .block, #dreamer-image > div {
-    background: #08060e !important;
+    background: transparent !important;
     border: none !important;
     box-shadow: none !important;
 }
@@ -234,19 +242,9 @@ footer, .share-button, .duplicate-button, .built-with { display: none !important
     border: 2px solid #201828;
     width: 100%;
     display: block;
-    filter: saturate(0.35) brightness(0.72) contrast(0.88);
-}
-#dreamer-image::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background:
-        radial-gradient(ellipse at 15% 25%, rgba(200, 210, 240, 0.12) 0%, transparent 55%),
-        radial-gradient(ellipse at 85% 65%, rgba(180, 190, 230, 0.09) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 10%, rgba(220, 220, 255, 0.08) 0%, transparent 40%),
-        linear-gradient(180deg, rgba(150,150,180,0.06) 0%, transparent 30%, transparent 70%, rgba(100,100,140,0.1) 100%);
-    pointer-events: none;
-    animation: fog-drift 12s ease-in-out infinite;
+    position: relative;
+    z-index: 1;
+    filter: none;
 }
 #dreamer-label {
     color: #5a4a7a;
@@ -265,6 +263,40 @@ footer, .share-button, .duplicate-button, .built-with { display: none !important
     font-style: italic;
     animation: flicker 3s infinite;
     letter-spacing: 0.05em;
+}
+
+.entity-loading {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0;
+    animation: loading-pulse 1.4s ease-in-out infinite;
+}
+.loading-dots {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 0;
+    animation: loading-dots 1.1s steps(4, end) infinite;
+}
+.scientist-loading {
+    color: #00ff41;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.mythologist-loading {
+    color: #d8a0ff;
+    font-style: italic;
+}
+.dreamer-loading {
+    color: #8f84b0;
+}
+#dreamer-loading-panel {
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    color: #8f84b0;
+    font-style: italic;
+    letter-spacing: 0.04em;
 }
 """
 
@@ -296,6 +328,7 @@ with gr.Blocks(css=CUSTOM_CSS, title="The Séance",
 
     # Dreamer image
     gr.HTML('<div id="dreamer-label">✦ The Dreamer</div>')
+    dreamer_loading_out = gr.HTML('<div id="dreamer-loading-panel"></div>')
     dreamer_out = gr.Image(show_label=False, elem_id="dreamer-image")
 
     # Download button
@@ -307,15 +340,17 @@ with gr.Blocks(css=CUSTOM_CSS, title="The Séance",
                 '<div id="status-msg">Speak a concept to begin the summoning.</div>',
                 '<div id="scientist-panel"></div>',
                 '<div id="mythologist-panel"></div>',
+                '<div id="dreamer-loading-panel"></div>',
                 None,
                 gr.update(visible=False),
             )
             return
 
         yield (
-            '<div id="status-msg">The Scientist observes...</div>',
-            '<div id="scientist-panel">...</div>',
-            '<div id="mythologist-panel"></div>',
+            '<div id="status-msg"><span class="entity-loading">The entities are channeling<span class="loading-dots">...</span></span></div>',
+            '<div id="scientist-panel"><span class="entity-loading scientist-loading">Calculating spectral residue<span class="loading-dots">...</span></span></div>',
+            '<div id="mythologist-panel"><span class="entity-loading mythologist-loading">Gathering echoes from the elder tongue<span class="loading-dots">...</span></span></div>',
+            '<div id="dreamer-loading-panel"><span class="entity-loading dreamer-loading">Condensing the fog into form<span class="loading-dots">...</span></span></div>',
             None,
             gr.update(visible=False),
         )
@@ -323,25 +358,10 @@ with gr.Blocks(css=CUSTOM_CSS, title="The Séance",
         artifact = pipeline.summon(concept)
 
         yield (
-            '<div id="status-msg">The Mythologist remembers...</div>',
-            f'<div id="scientist-panel">{artifact["scientist_text"]}</div>',
-            '<div id="mythologist-panel">...</div>',
-            None,
-            gr.update(visible=False),
-        )
-
-        yield (
-            '<div id="status-msg">The Dreamer is forming the image...</div>',
-            f'<div id="scientist-panel">{artifact["scientist_text"]}</div>',
-            f'<div id="mythologist-panel">{artifact["mythologist_text"]}</div>',
-            None,
-            gr.update(visible=False),
-        )
-
-        yield (
             '<div id="status-msg">The summoning is complete.</div>',
             f'<div id="scientist-panel">{artifact["scientist_text"]}</div>',
             f'<div id="mythologist-panel">{artifact["mythologist_text"]}</div>',
+            '<div id="dreamer-loading-panel"></div>',
             artifact.get("image_path"),
             gr.update(visible=True, value=artifact.get("image_path")),
         )
@@ -349,12 +369,12 @@ with gr.Blocks(css=CUSTOM_CSS, title="The Séance",
     summon_btn.click(
         fn=summon,
         inputs=[concept_input],
-        outputs=[status_msg, scientist_out, mythologist_out, dreamer_out, download_btn],
+        outputs=[status_msg, scientist_out, mythologist_out, dreamer_loading_out, dreamer_out, download_btn],
     )
     concept_input.submit(
         fn=summon,
         inputs=[concept_input],
-        outputs=[status_msg, scientist_out, mythologist_out, dreamer_out, download_btn],
+        outputs=[status_msg, scientist_out, mythologist_out, dreamer_loading_out, dreamer_out, download_btn],
     )
 
 if __name__ == "__main__":
