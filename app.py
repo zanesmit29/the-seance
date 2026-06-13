@@ -59,10 +59,49 @@ CUSTOM_CSS = """@keyframes flicker {
     0%, 100% { box-shadow: 0 0 10px rgba(100, 50, 180, 0.3), inset 0 0 20px rgba(100, 50, 180, 0.1); }
     50% { box-shadow: 0 0 25px rgba(100, 50, 180, 0.5), inset 0 0 30px rgba(100, 50, 180, 0.2); }
 }
+@keyframes smoke-plume-a {
+    0% { transform: translate3d(-5%, 2%, 0) scale(1.05) rotate(0.2deg); opacity: 0.24; }
+    33% { transform: translate3d(4%, -2%, 0) scale(1.13) rotate(-0.2deg); opacity: 0.4; }
+    66% { transform: translate3d(-2%, -1%, 0) scale(1.09) rotate(0.2deg); opacity: 0.31; }
+    100% { transform: translate3d(-5%, 2%, 0) scale(1.05) rotate(0.2deg); opacity: 0.24; }
+}
+@keyframes smoke-plume-b {
+    0% { transform: translate3d(3%, 1%, 0) scale(1.02); opacity: 0.2; }
+    40% { transform: translate3d(-4%, -2%, 0) scale(1.12); opacity: 0.34; }
+    80% { transform: translate3d(2%, 2%, 0) scale(1.08); opacity: 0.27; }
+    100% { transform: translate3d(3%, 1%, 0) scale(1.02); opacity: 0.2; }
+}
+@keyframes smoke-plume-c {
+    0% { transform: translate3d(-1%, 3%, 0) scale(1); opacity: 0.16; }
+    45% { transform: translate3d(3%, -2%, 0) scale(1.07); opacity: 0.28; }
+    100% { transform: translate3d(-1%, 3%, 0) scale(1); opacity: 0.16; }
+}
+@keyframes grain-drift {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-1.2%, 0.8%); }
+    50% { transform: translate(0.8%, -1%); }
+    75% { transform: translate(-0.6%, -0.8%); }
+    100% { transform: translate(0, 0); }
+}
+@keyframes ritual-surge {
+    0% { opacity: 0; }
+    40% { opacity: 0.35; }
+    100% { opacity: 0; }
+}
 @keyframes fog-drift {
     0% { opacity: 0.55; transform: translateX(0) scaleX(1); }
     50% { opacity: 0.75; transform: translateX(8px) scaleX(1.02); }
     100% { opacity: 0.55; transform: translateX(0) scaleX(1); }
+}
+@keyframes panel-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 @keyframes loading-pulse {
     0%, 100% { opacity: 0.45; }
@@ -107,6 +146,15 @@ CUSTOM_CSS = """@keyframes flicker {
     --input-shadow-focus: none !important;
 }
 
+:root {
+    --smoke-violet: rgba(130, 100, 182, 0.48);
+    --smoke-indigo: rgba(58, 76, 132, 0.38);
+    --smoke-char: rgba(18, 16, 26, 0.62);
+    --smoke-speed-a: 32s;
+    --smoke-speed-b: 46s;
+    --smoke-speed-c: 58s;
+}
+
 html {
     background: #050507 !important;
     animation: scene-flicker 7s infinite;
@@ -118,7 +166,67 @@ body, .gradio-container {
     font-family: 'Georgia', serif;
 }
 
+.gradio-container::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background:
+        radial-gradient(120vmax 75vmax at 50% 12%, transparent 0%, rgba(0, 0, 0, 0.22) 48%, rgba(0, 0, 0, 0.72) 100%),
+        linear-gradient(180deg, transparent 0%, var(--smoke-char) 100%);
+    box-shadow: inset 0 0 180px rgba(0, 0, 0, 0.75);
+}
+
 .gradio-container { max-width: 100vw !important; width: 100% !important; min-height: 100vh !important; margin: 0 !important; padding: 0 40px !important; }
+
+.gradio-container > * {
+    position: relative;
+    z-index: 4;
+}
+
+#smoke-layer {
+    position: fixed;
+    inset: -12%;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+#smoke-layer .smoke {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(36px);
+    mix-blend-mode: screen;
+    will-change: transform, opacity;
+}
+
+#smoke-layer .smoke-a {
+    width: 78vmax;
+    height: 54vmax;
+    top: -10vmax;
+    left: -18vmax;
+    background: radial-gradient(ellipse at center, var(--smoke-violet) 0%, rgba(90, 66, 130, 0.18) 46%, transparent 75%);
+    animation: smoke-plume-a var(--smoke-speed-a) ease-in-out infinite;
+}
+
+#smoke-layer .smoke-b {
+    width: 84vmax;
+    height: 58vmax;
+    right: -20vmax;
+    top: 12vmax;
+    background: radial-gradient(ellipse at center, var(--smoke-indigo) 0%, rgba(60, 72, 118, 0.2) 44%, transparent 74%);
+    animation: smoke-plume-b var(--smoke-speed-b) ease-in-out infinite;
+}
+
+#smoke-layer .smoke-c {
+    width: 96vmax;
+    height: 52vmax;
+    left: 4vmax;
+    bottom: -22vmax;
+    background: radial-gradient(ellipse at center, rgba(94, 77, 126, 0.24) 0%, rgba(60, 52, 82, 0.14) 42%, transparent 74%);
+    animation: smoke-plume-c var(--smoke-speed-c) ease-in-out infinite;
+}
 
 /* Hide all default Gradio chrome */
 footer, .share-button, .duplicate-button, .built-with { display: none !important; }
@@ -147,6 +255,24 @@ footer, .share-button, .duplicate-button, .built-with { display: none !important
 }
 
 /* Input area — kill ALL Gradio default borders and glows */
+#ritual-input-shell {
+    position: relative;
+    padding: 14px;
+    border: 1px solid rgba(118, 84, 172, 0.32) !important;
+    background: linear-gradient(160deg, rgba(20, 16, 33, 0.85), rgba(10, 9, 16, 0.7)) !important;
+    box-shadow: inset 0 0 0 1px rgba(173, 129, 237, 0.08), 0 0 28px rgba(48, 28, 74, 0.34);
+    backdrop-filter: blur(4px);
+}
+
+#ritual-input-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(120deg, transparent 35%, rgba(181, 140, 240, 0.1) 50%, transparent 65%);
+    opacity: 0.5;
+}
+
 #concept-input, #concept-input *, #concept-input *:focus, #concept-input *:active, #concept-input *:hover {
     outline: none !important;
 }
@@ -157,25 +283,41 @@ footer, .share-button, .duplicate-button, .built-with { display: none !important
     padding: 0 !important;
 }
 #concept-input textarea {
-    background: #0c0a12 !important;
-    border: 1px solid #2e2248 !important;
-    color: #c0b8d0 !important;
-    font-family: 'Georgia', serif !important;
-    font-size: 1.1em !important;
-    text-align: center;
-    border-radius: 0 !important;
-    box-shadow: none !important;
+    background: linear-gradient(180deg, rgba(11, 9, 18, 0.94), rgba(15, 11, 25, 0.92)) !important;
+    border: 1px solid rgba(95, 72, 141, 0.75) !important;
+    color: #d8d0e7 !important;
+    font-family: 'Palatino Linotype', 'Georgia', serif !important;
+    font-size: 1.05em !important;
+    text-align: left;
+    border-radius: 2px !important;
+    box-shadow: inset 0 0 18px rgba(95, 58, 150, 0.15), 0 0 0 1px rgba(166, 124, 232, 0.1) !important;
     outline: none !important;
-    caret-color: #8060a0;
-    padding: 12px !important;
+    caret-color: #b88ef3;
+    letter-spacing: 0.02em;
+    line-height: 1.45;
+    padding: 14px 16px !important;
+    transition: border-color 0.18s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+#concept-input textarea::placeholder {
+    color: rgba(184, 167, 216, 0.58) !important;
+    font-style: italic;
+    letter-spacing: 0.05em;
 }
 #concept-input textarea:focus {
-    border-color: #4a3a70 !important;
-    box-shadow: none !important;
+    border-color: rgba(188, 143, 248, 0.92) !important;
+    box-shadow: inset 0 0 22px rgba(112, 73, 182, 0.22), 0 0 24px rgba(146, 102, 214, 0.26) !important;
     outline: none !important;
+    transform: translateY(-1px);
+}
+
+#ritual-input-shell:focus-within {
+    border-color: rgba(184, 138, 248, 0.78) !important;
+    box-shadow: inset 0 0 0 1px rgba(190, 146, 248, 0.14), 0 0 36px rgba(110, 62, 184, 0.42);
 }
 
 #summon-btn {
+    position: relative;
+    overflow: hidden;
     background: #0e0a18 !important;
     border: 1px solid #3a2a5a !important;
     color: #a070d0 !important;
@@ -183,11 +325,27 @@ footer, .share-button, .duplicate-button, .built-with { display: none !important
     font-family: 'Georgia', serif !important;
     font-size: 0.9em !important;
     animation: breathe 4s infinite;
+    transition: transform 0.18s ease, box-shadow 0.25s ease;
 }
 #summon-btn:hover {
     background: #180f2a !important;
     border-color: #7050a0 !important;
     color: #c090e0 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 0 18px rgba(130, 84, 190, 0.28);
+}
+#summon-btn:active {
+    transform: translateY(1px) scale(0.995);
+}
+#summon-btn.is-channeling {
+    box-shadow: 0 0 22px rgba(146, 99, 201, 0.36), inset 0 0 10px rgba(146, 99, 201, 0.12);
+}
+#summon-btn.is-channeling::after {
+    content: "";
+    position: absolute;
+    inset: -35% -10%;
+    background: linear-gradient(110deg, transparent 35%, rgba(200, 155, 255, 0.22) 50%, transparent 65%);
+    animation: grain-drift 1.6s linear infinite;
 }
 
 /* Scientist panel — rigid, cold, neon green terminal */
@@ -290,6 +448,32 @@ footer, .share-button, .duplicate-button, .built-with { display: none !important
     letter-spacing: 0.05em;
 }
 
+body[data-seance-state="channeling"] #status-msg {
+    color: #aa86d6;
+    text-shadow: 0 0 10px rgba(152, 102, 214, 0.3);
+}
+body[data-seance-state="channeling"] {
+    --smoke-speed-a: 20s;
+    --smoke-speed-b: 31s;
+    --smoke-speed-c: 38s;
+}
+body[data-seance-state="complete"] {
+    --smoke-speed-a: 15s;
+    --smoke-speed-b: 24s;
+    --smoke-speed-c: 29s;
+}
+body[data-seance-state="complete"] .gradio-container::after {
+    animation: ritual-surge 1.1s ease-out;
+}
+
+.panel-reveal {
+    opacity: 0;
+    animation: panel-reveal 0.55s ease forwards;
+}
+.reveal-1 { animation-delay: 0.03s; }
+.reveal-2 { animation-delay: 0.17s; }
+.reveal-3 { animation-delay: 0.31s; }
+
 .entity-loading {
     display: inline-flex;
     align-items: baseline;
@@ -345,6 +529,26 @@ footer, .share-button, .duplicate-button, .built-with { display: none !important
     border-color: #7050a0 !important;
     color: #c090e0 !important;
 }
+
+@media (max-width: 900px) {
+    .gradio-container {
+        padding: 0 16px !important;
+    }
+    #ritual-input-shell {
+        padding: 10px;
+    }
+    #seance-title {
+        font-size: 2.2em;
+        padding-top: 28px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
 """
 BACKGROUND_AUDIO = f"""
 <audio id="seance-bg-audio" loop preload="auto">
@@ -365,6 +569,38 @@ HEAD_SNIPPET = """
 <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap" rel="stylesheet">
 <script>
 (() => {
+    const setSceneState = (state) => {
+        document.body.setAttribute('data-seance-state', state);
+        const summonBtn = document.querySelector('#summon-btn button, #summon-btn');
+        if (summonBtn) {
+            summonBtn.classList.toggle('is-channeling', state === 'channeling');
+        }
+    };
+
+    const observeSummonState = () => {
+        const resolveStatusNode = () => document.querySelector('#status-msg');
+        const node = resolveStatusNode();
+        if (!node) return false;
+
+        const applyStateFromText = () => {
+            const text = (node.textContent || '').toLowerCase();
+            if (text.includes('channeling')) {
+                setSceneState('channeling');
+                return;
+            }
+            if (text.includes('complete')) {
+                setSceneState('complete');
+                return;
+            }
+            setSceneState('idle');
+        };
+
+        applyStateFromText();
+        const obs = new MutationObserver(applyStateFromText);
+        obs.observe(node, { childList: true, subtree: true, characterData: true });
+        return true;
+    };
+
     const bindAudio = () => {
         const audio = document.getElementById('seance-bg-audio');
         const enableBtn = document.getElementById('enable-audio-btn');
@@ -420,6 +656,15 @@ HEAD_SNIPPET = """
     };
 
     const startBinding = () => {
+        setSceneState('idle');
+        if (!observeSummonState()) {
+            const statusObserver = new MutationObserver(() => {
+                if (observeSummonState()) statusObserver.disconnect();
+            });
+            statusObserver.observe(document.body, { childList: true, subtree: true });
+            setTimeout(() => statusObserver.disconnect(), 15000);
+        }
+
         if (bindAudio()) return;
         const observer = new MutationObserver(() => {
             if (bindAudio()) observer.disconnect();
@@ -442,11 +687,18 @@ with gr.Blocks(title="The Séance", css=CUSTOM_CSS, head=HEAD_SNIPPET) as demo:
 
     # Add background audio
     gr.HTML(BACKGROUND_AUDIO)
+    gr.HTML(
+        '<div id="smoke-layer" aria-hidden="true">'
+        '<span class="smoke smoke-a"></span>'
+        '<span class="smoke smoke-b"></span>'
+        '<span class="smoke smoke-c"></span>'
+        '</div>'
+    )
 
     gr.HTML('<div id="seance-title">✦ The Séance ✦</div>')
     gr.HTML("<div id=\"seance-subtitle\">Name something that doesn't exist. Three entities will channel its form.</div>")
 
-    with gr.Row():
+    with gr.Row(elem_id="ritual-input-shell"):
         concept_input = gr.Textbox(
             placeholder="the last color light ever made...",
             show_label=False,
@@ -498,9 +750,9 @@ with gr.Blocks(title="The Séance", css=CUSTOM_CSS, head=HEAD_SNIPPET) as demo:
 
         yield (
             '<div id="status-msg">The summoning is complete.</div>',
-            f'<div id="scientist-panel">{artifact["scientist_text"]}</div>',
-            f'<div id="mythologist-panel">{artifact["mythologist_text"]}</div>',
-            '<div id="dreamer-loading-panel"></div>',
+            f'<div id="scientist-panel" class="panel-reveal reveal-1">{artifact["scientist_text"]}</div>',
+            f'<div id="mythologist-panel" class="panel-reveal reveal-2">{artifact["mythologist_text"]}</div>',
+            '<div id="dreamer-loading-panel" class="panel-reveal reveal-3"></div>',
             artifact.get("image_path"),
             gr.update(visible=True, value=artifact.get("image_path")),
         )
